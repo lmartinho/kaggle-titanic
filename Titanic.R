@@ -111,6 +111,27 @@ misses.alone <- data.combined[which(data.combined$SibSp == 0 & data.combined$Par
 summary(misses.alone$Age)
 
 # Understanding Sibsp
+data.combined$SibSp <- as.factor(data.combined$SibSp)
 ggplot(data.combined[1:891,], aes(x = SibSp, fill = Survived)) + 
   geom_bar(width = 0.75) +
   facet_wrap(~Pclass + Title)
+
+str(data.combined$Parch)
+data.combined$Parch <- as.factor(data.combined$Parch)
+ggplot(data.combined[1:891,], aes(x = Parch, fill = Survived)) + 
+  geom_bar(width = 0.75) +
+  facet_wrap(~Pclass + Title)
+
+temp.sibsp = c(train$SibSp, test$SibSp)
+temp.parch = c(train$Parch, test$Parch)
+data.combined$family.size <- as.factor(temp.sibsp + temp.parch + 1)
+
+# Understanding Family Size
+ggplot(data.combined[1:891,], aes(x = family.size, fill = Survived)) + 
+  geom_bar(width = 0.75) +
+  facet_wrap(~Pclass + Title) + 
+  ggtitle("Pclass, Title") + 
+  xlab("family.size") + 
+  ylab("Total Count") + 
+  ylim(0, 300) +
+  labs(fill = "Survived")
