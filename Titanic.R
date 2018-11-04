@@ -82,3 +82,35 @@ ggplot(data.combined[1:891,], aes(x = Title, fill = Survived)) +
   xlab("Title") + 
   ylab("Total Count") + 
   labs(fill = "Survived")
+
+# Start of Part 2 of series
+
+ggplot(data.combined[1:891,], aes(x = Sex, fill = Survived)) +
+  geom_bar(width = 0.5) + 
+  facet_wrap(~Pclass) + 
+  ggtitle("Pclass") +
+  xlab("Sex") + 
+  ylab("Total Count") + 
+  labs(fill = "Survived")
+
+
+summary(data.combined$Age)
+summary(data.combined[1:891, "Age"])
+summary(test[, "Age"])
+summary(train[, "Age"])
+
+# Expanding on the hypothesis regarding title
+boys <- data.combined[which(data.combined$Title == 'Master.'),]
+summary(boys$Age)
+
+misses <- data.combined[which(data.combined$Title == 'Miss.'),]
+summary(misses$Age)
+
+# Check if Misses travelling along are older
+misses.alone <- data.combined[which(data.combined$SibSp == 0 & data.combined$Parch == 0),]
+summary(misses.alone$Age)
+
+# Understanding Sibsp
+ggplot(data.combined[1:891,], aes(x = SibSp, fill = Survived)) + 
+  geom_bar(width = 0.75) +
+  facet_wrap(~Pclass + Title)
