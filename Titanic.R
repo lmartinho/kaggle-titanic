@@ -135,3 +135,64 @@ ggplot(data.combined[1:891,], aes(x = family.size, fill = Survived)) +
   ylab("Total Count") + 
   ylim(0, 300) +
   labs(fill = "Survived")
+
+# Understanding Family Size
+str(data.combined$Ticket)
+data.combined$Ticket = as.character(data.combined$Ticket)
+data.combined$Ticket[1:20]
+
+ticket.first.char <- ifelse(data.combined$Ticket == "", " ", substr(data.combined$Ticket, 1, 1))
+unique(ticket.first.char)
+data.combined$ticket.first.char <- as.factor(ticket.first.char)
+
+str(data.combined[1:891,])
+
+ggplot(data.combined[1:891,], aes(x = ticket.first.char, fill = Survived)) + 
+  geom_bar()
+
+# Trying to find a feature that follows a normal distribution
+ggplot(data.combined[1:891,], aes(x = Age)) + 
+  geom_bar()
+summary(data.combined$Age)
+
+ggplot(data.combined[1:891,], aes(x = Fare)) + 
+  geom_bar()
+summary(data.combined$Fare)
+
+ggplot(data.combined[1:891,], aes(x = ticket.first.char, fill = Survived)) + 
+  geom_bar() + 
+  facet_wrap(~Pclass+Title)
+
+# Look into fares
+length(unique(data.combined$Fare))
+ggplot(data.combined[1:891,], aes(x = Fare)) + 
+  geom_bar(width = 0.75)
+ggplot(data.combined[1:891,], aes(x = Fare, fill = Survived)) + 
+  geom_histogram(binwidth = 5) + 
+  facet_wrap(~Pclass + Title) + 
+  ylim(0, 50)
+
+str(data.combined$Cabin)
+# Cabin isn't really a factor, make it a character object
+data.combined$Cabin = as.character(data.combined$Cabin)
+data.combined$Cabin[1:100]
+
+table(data.combined$Cabin)
+
+data.combined[which(data.combined$Cabin == ""), "Cabin"] <- "U"
+data.combined$Cabin
+
+cabin.first.char <- as.factor(substr(data.combined$Cabin, 1, 1))
+str(cabin.first.char)
+levels(cabin.first.char)
+
+data.combined$cabin.first.char <- cabin.first.char
+
+# High level plot
+ggplot(data.combined[1:891,], aes(x = cabin.first.char, fill = Survived)) +
+  geom_bar()
+
+# Validating intuition about first letters matching upper classes
+ggplot(data.combined[1:891,], aes(x = cabin.first.char, fill = Survived)) +
+  geom_bar() + 
+  facet_wrap(~Pclass)
