@@ -196,3 +196,9 @@ ggplot(data.combined[1:891,], aes(x = cabin.first.char, fill = Survived)) +
 ggplot(data.combined[1:891,], aes(x = cabin.first.char, fill = Survived)) +
   geom_bar() + 
   facet_wrap(~Pclass)
+
+
+# Validating intuition about first letters matching upper classes
+ggplot(data.combined[1:891,], aes(x = Fare, fill = Survived)) +
+  geom_histogram(binwidth=50) + 
+  facet_wrap(~Pclass+Title)
