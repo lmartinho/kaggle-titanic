@@ -202,3 +202,33 @@ ggplot(data.combined[1:891,], aes(x = cabin.first.char, fill = Survived)) +
 ggplot(data.combined[1:891,], aes(x = Fare, fill = Survived)) +
   geom_histogram(binwidth=50) + 
   facet_wrap(~Pclass+Title)
+
+# Check whether having multiple cabins booked, increases your chance of survival
+cabin.multiple = grepl(" ", data.combined[,"Cabin"])
+data.combined$cabin.multiple = cabin.multiple
+ggplot(data.combined[1:891,], aes(x = cabin.multiple, fill = Survived)) +
+  geom_bar() + 
+  facet_wrap(~Pclass+Title)
+
+# Doing it exactly like in the video
+data.combined$cabin.multiple.factor = as.factor(ifelse(str_detect(data.combined$Cabin, " "), "Y", "N"))
+ggplot(data.combined[1:891,], aes(x = cabin.multiple.factor, fill = Survived)) +
+  geom_bar() + 
+  facet_wrap(~Pclass+Title)
+
+# Checking whether where you embarked determines your survival rate
+ggplot(data.combined[1:891,], aes(x = Embarked, fill = Survived)) +
+  geom_bar() + 
+  facet_wrap(~Pclass+Title)
+
+# Video #4 - Exploratory Modelling
+
+library(randomForest)
+
+rf.train.1 <- data.combined[1:891, c("Pclass", "Title")]
+rf.label <- as.factor(train$Survived)
+
+set.seed(1234)
+rf.1 <- randomForest(x = rf.train.1, y = rf.label, importance = TRUE, ntree = 1000)
+rf.1
+varImpPlot(rf.1)
