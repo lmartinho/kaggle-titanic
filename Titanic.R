@@ -124,14 +124,14 @@ ggplot(data.combined[1:891,], aes(x = Parch, fill = Survived)) +
 
 temp.sibsp = c(train$SibSp, test$SibSp)
 temp.parch = c(train$Parch, test$Parch)
-data.combined$family.size <- as.factor(temp.sibsp + temp.parch + 1)
+data.combined$FamilySize <- as.factor(temp.sibsp + temp.parch + 1)
 
 # Understanding Family Size
-ggplot(data.combined[1:891,], aes(x = family.size, fill = Survived)) + 
+ggplot(data.combined[1:891,], aes(x = FamilySize, fill = Survived)) + 
   geom_bar(width = 0.75) +
   facet_wrap(~Pclass + Title) + 
   ggtitle("Pclass, Title") + 
-  xlab("family.size") + 
+  xlab("FamilySize") + 
   ylab("Total Count") + 
   ylim(0, 300) +
   labs(fill = "Survived")
@@ -225,10 +225,41 @@ ggplot(data.combined[1:891,], aes(x = Embarked, fill = Survived)) +
 
 library(randomForest)
 
-rf.train.1 <- data.combined[1:891, c("Pclass", "Title")]
 rf.label <- as.factor(train$Survived)
-
 set.seed(1234)
+
+rf.train.1 <- data.combined[1:891, c("Pclass", "Title")]
 rf.1 <- randomForest(x = rf.train.1, y = rf.label, importance = TRUE, ntree = 1000)
 rf.1
 varImpPlot(rf.1)
+
+rf.train.2 <- data.combined[1:891, c("Pclass", "Title", "FamilySize")]
+rf.2 <- randomForest(x = rf.train.2, y = rf.label, importance = TRUE, ntree = 1000)
+rf.2
+varImpPlot(rf.2)
+
+rf.train.3 <- data.combined[1:891, c("Pclass", "Title", "FamilySize", "Parch")]
+rf.3 <- randomForest(x = rf.train.3, y = rf.label, importance = TRUE, ntree = 1000)
+rf.3
+varImpPlot(rf.3)
+
+rf.train.4 <- data.combined[1:891, c("Pclass", "Title", "FamilySize", "Parch", "SibSp")]
+rf.4 <- randomForest(x = rf.train.4, y = rf.label, importance = TRUE, ntree = 1000)
+rf.4
+varImpPlot(rf.4)
+
+rf.train.5 <- data.combined[1:891, c("Pclass", "Title", "FamilySize", "SibSp")]
+rf.5 <- randomForest(x = rf.train.5, y = rf.label, importance = TRUE, ntree = 1000)
+rf.5
+varImpPlot(rf.5)
+
+rf.train.7 <- data.combined[1:891, c("Pclass", "Title", "Parch", "FamilySize", "SibSp")]
+rf.7 <- randomForest(x = rf.train.7, y = rf.label, importance = TRUE, ntree = 1000)
+rf.7
+varImpPlot(rf.7)
+
+# Prepare predictions for submission
+rf.test <- data.combined[892:1309, c("Pclass", "Title", "FamilySize", "SibSp")]
+rf.submission <- data.combined[892:1309, c("PassengerId", "Survived")]
+rf.submission$Survived <- predict(rf.7, rf.test)
+write.csv(rf.submission[, c("PassengerId","Survived")], "submission.csv", row.names = FALSE)
