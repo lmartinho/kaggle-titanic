@@ -253,7 +253,7 @@ rf.5 <- randomForest(x = rf.train.5, y = rf.label, importance = TRUE, ntree = 10
 rf.5
 varImpPlot(rf.5)
 
-rf.train.7 <- data.combined[1:891, c("Pclass", "Title", "Parch", "FamilySize", "SibSp")]
+rf.train.7 <- data.combined[1:891, c("Pclass", "Title", "FamilySize", "SibSp")]
 rf.7 <- randomForest(x = rf.train.7, y = rf.label, importance = TRUE, ntree = 1000)
 rf.7
 varImpPlot(rf.7)
@@ -261,5 +261,11 @@ varImpPlot(rf.7)
 # Prepare predictions for submission
 rf.test <- data.combined[892:1309, c("Pclass", "Title", "FamilySize", "SibSp")]
 rf.submission <- data.combined[892:1309, c("PassengerId", "Survived")]
-rf.submission$Survived <- predict(rf.7, rf.test)
+rf.submission$Survived <- predict(rf.2, rf.test)
 write.csv(rf.submission[, c("PassengerId","Survived")], "submission.csv", row.names = FALSE)
+
+# Prepare predictions for submission (more like the video series)
+test.submit.df <- data.combined[892:1309, c("Pclass", "Title", "FamilySize", "SibSp")]
+rf.7.preds = predict(rf.7, test.submit.df)
+submit.df <- data.frame(PassengerId = rep(892:1309), Survived = rf.7.preds)
+write.csv(submit.df, file = 'submission_alt.csv', row.names = FALSE)
