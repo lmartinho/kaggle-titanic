@@ -264,8 +264,81 @@ rf.submission <- data.combined[892:1309, c("PassengerId", "Survived")]
 rf.submission$Survived <- predict(rf.2, rf.test)
 write.csv(rf.submission[, c("PassengerId","Survived")], "submission.csv", row.names = FALSE)
 
+# Introduction to Data Science with R - Cross Validation
+# https://www.youtube.com/watch?v=84JSk36og34&t=2110s
+# Part 5 of the video series
+
 # Prepare predictions for submission (more like the video series)
 test.submit.df <- data.combined[892:1309, c("Pclass", "Title", "FamilySize", "SibSp")]
 rf.7.preds = predict(rf.7, test.submit.df)
 submit.df <- data.frame(PassengerId = rep(892:1309), Survived = rf.7.preds)
 write.csv(submit.df, file = 'submission_alt.csv', row.names = FALSE)
+
+# OOB error estimate: 19.53% (0.8047 score), but submissions score was only 
+# 0.76076, so need to introduce cross validation
+
+library(caret) # short for _C_lassification _A_nd _RE_gression _T_raining
+library(doSNOW)
+
+set.seed(2348)
+cv.10.folds <- createMultiFolds(rf.label, k = 10, times = 10)
+
+# Check stratification
+table(rf.label)
+342 / 549
+table(rf.label[cv.10.folds[[34]]])
+308 / 494
+
+# Start using trainControl
+ctrl.1 <- trainControl(method = "repeatedcv", number = 10, repeats = 10, 
+                       index = cv.10.folds)
+
+# MBP: `sysctl hw.physicalcpu hw.logicalcpu`: 4 cpus, 8 threads
+cl <- makeCluster(6, type = "SOCK")
+registerDoSNOW(cl)
+
+# 10 fold cross validation, repeated 10 times, with stratified samples
+set.seed(3434)
+rf.2.cv.1 <- train(x = rf.train.2, y = rf.label, method = "rf", tuneLength = 3,
+                   ntree = 1000, trControl = ctrl.1)
+
+# Shutdown Cluster
+stopCluster(cl)
+
+# Check out results
+rf.2.cv.1
+
+cl <- makeCluster(6, type = "SOCK")
+registerDoSNOW(cl)
+
+# Trying with rf.5
+set.seed(3434)
+rf.5.cv.1 <- train(x = rf.train.5, y = rf.label, method = "rf", tuneLength = 3,
+                   ntree = 1000, trControl = ctrl.1)
+
+# Shutdown Cluster
+stopCluster(cl)
+
+# Trying with 5-fold
+set.seed(2348)
+cv.5.folds <- createMultiFolds(rf.label, k = 5, times = 10)
+ctrl.2 <- trainControl(method = "repeatedcv", number = 5, repeats = 10, index = cv.5.folds)
+cl <- makeCluster(6, type = "SOCK")
+registerDoSNOW(cl)
+set.seed(3434)
+rf.5.cv.1 <- train(x = rf.train.5, y = rf.label, method = "rf", tuneLength = 3,
+                   ntree = 1000, trControl = ctrl.2)
+stopCluster(cl)
+rf.5.cv.1
+
+# Didn't improve, try 3-fold
+set.seed(2348)
+cv.3.folds <- createMultiFolds(rf.label, k = 3, times = 10)
+ctrl.3 <- trainControl(method = "repeatedcv", number = 3, repeats = 10, index = cv.3.folds)
+cl <- makeCluster(6, type = "SOCK")
+registerDoSNOW(cl)
+set.seed(3434)
+rf.5.cv.3 <- train(x = rf.train.5, y = rf.label, method = "rf", tuneLength = 3,
+                   ntree = 1000, trControl = ctrl.3)
+stopCluster(cl)
+rf.5.cv.3
